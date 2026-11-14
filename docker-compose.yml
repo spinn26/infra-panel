@@ -1,0 +1,21 @@
+name: infra-panel
+
+services:
+  panel:
+    build: .
+    image: infra-panel:latest
+    container_name: infra-panel
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOST_DEPLOY_HOST:-/opt/fleet/deploy}:/host-deploy:ro
+      - infra-panel-data:/data
+      - ${HOST_BACKUPS_DIR:-/opt/fleet/backups}:/backups
+    group_add:
+      - "${DOCKER_GID:-985}"
+
+volumes:
+  infra-panel-data:
