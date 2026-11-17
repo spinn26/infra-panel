@@ -74,7 +74,7 @@
     <rect x="72" y="496" width="186" height="40" rx="20" fill="#ffffff" fill-opacity=".06" stroke="#ffffff" stroke-opacity=".1"/>
     <circle cx="94" cy="516" r="4" fill="#e9c27a"/><text x="108" y="521">2-minute install</text>
   </g>
-  <text x="72" y="590" font-family="'JetBrains Mono', Consolas, monospace" font-size="16" fill="#8ed1b0">$ docker compose up -d --build</text>
+  <text x="72" y="590" font-family="'JetBrains Mono', Consolas, monospace" font-size="16" fill="#8ed1b0">$ curl -fsSL …/infra-panel/main/install.sh | bash</text>
 
   <!-- макет панели -->
   <g filter="url(#soft)">
