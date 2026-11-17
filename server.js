@@ -3,6 +3,7 @@
 import http from 'node:http';
 import crypto from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFileSync, statSync } from 'node:fs';
 
 const PORT = Number(process.env.PORT || 8080);
 const SOCKET = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
@@ -20,11 +21,25 @@ const CLIENT_JS = await readFile(new URL('./client.js', import.meta.url), 'utf8'
 
 /* ---------- описания контейнеров: что внутри ---------- */
 
+// Встроенные описания — только для самой панели. Описания ваших контейнеров
+// хранятся на сервере в DATA_DIR/descriptions.json ({"имя": "что и куда"})
+// и подхватываются без перезапуска. В репозиторий они не попадают.
 const DESCRIPTIONS = {
   'infra-panel': 'Эта панель управления инфраструктурой',
 };
+const DESC_FILE = `${DATA_DIR}/descriptions.json`;
+let userDesc = {}, userDescMtime = 0;
+function loadUserDescriptions() {
+  try {
+    const m = statSync(DESC_FILE).mtimeMs;
+    if (m !== userDescMtime) { userDesc = JSON.parse(readFileSync(DESC_FILE, 'utf8')) || {}; userDescMtime = m; }
+  } catch { /* файла нет или он битый — работаем со встроенными */ }
+  return userDesc;
+}
 
 function describe(c) {
+  const own = loadUserDescriptions()[c.name];
+  if (typeof own === 'string' && own) return own;
   if (DESCRIPTIONS[c.name]) return DESCRIPTIONS[c.name];
   const m = /^aksite-(.+)$/.exec(c.name);
   if (m && c.preset && PRESETS[c.preset]) return `${PRESETS[c.preset].title} — aksite-${m[1]}`;
