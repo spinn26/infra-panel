@@ -32,12 +32,23 @@
 
 ## Установка
 
+### Быстрая установка
+
+Одна команда проверит Docker, склонирует репозиторий в `~/infra-panel`, создаст `.env` (спросит логин и пароль), каталоги `/opt/fleet/deploy` и `/opt/fleet/backups` и запустит контейнер:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/spinn26/infra-panel/main/install.sh | bash
+```
+
+Вручную — по шагам ниже.
+
+
 **Что нужно:** Linux-сервер с Docker 24+ и плагином Compose. Подойдёт VPS от 1 ГБ RAM.
 
 ### 1. Скачайте панель
 
 ```bash
-git clone -b legacy-single-file https://github.com/spinn26/infra-panel.git
+git clone https://github.com/spinn26/infra-panel.git
 cd infra-panel
 ```
 
@@ -119,6 +130,7 @@ Caddy сам выпустит сертификат. Панель распозн�
 | `HOST_BACKUPS_DIR` | Каталог бэкапов на хосте | `/opt/fleet/backups` |
 | `HOST_PUBLIC_IP` | Публичный IP сервера, подставляется в подсказку SSH для шаблона Ubuntu | — |
 | `DOCKER_GID` | Номер группы `docker` на хосте | `985` |
+| `ROOT_404_OK` | Домены через запятую, для которых ответ 404 на главной — норма (например, API без главной страницы). Считаются доступными и не дают предупреждений | — |
 
 ## Обновление
 

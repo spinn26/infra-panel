@@ -562,11 +562,17 @@ async function checkSite(domain) {
   }
 }
 
+const ROOT_404_OK = new Set(String(process.env.ROOT_404_OK || '').split(',').map((d) => d.trim().toLowerCase()).filter(Boolean));
+
 async function collectSites() {
   const source = await readFile(`${HOST_DEPLOY}/Caddyfile`, 'utf8').catch(() => '');
   const backends = parseBackendMap(source);
   const sites = await Promise.all(parseDomains(source).map(checkSite));
-  for (const s of sites) s.backend = backends[s.domain] || null;
+  for (const s of sites) {
+    s.backend = backends[s.domain] || null;
+    // 404 на корне для доменов из ROOT_404_OK — норма (например, API без главной страницы)
+    s.ok = (s.code > 0 && s.code < 400) || (s.code === 404 && ROOT_404_OK.has(s.domain));
+  }
   return sites;
 }
 
@@ -601,7 +607,7 @@ async function sampleOnce() {
     for (const s of ov.sites) {
       const rec = (history.sites[s.domain] ||= { ok: 0, total: 0 });
       rec.total++;
-      if (s.code > 0 && s.code < 400) rec.ok++;
+      if (s.ok) rec.ok++;
       if (rec.total > 100000) {
         rec.total = Math.floor(rec.total / 2);
         rec.ok = Math.floor(rec.ok / 2);
@@ -629,6 +635,7 @@ async function collectDisk() {
 function buildAlerts(ov, disk) {
   const alerts = [];
   for (const s of ov.sites) {
+    if (s.ok) continue;
     if (s.code === 0 || s.code >= 500) alerts.push({ level: 'crit', text: `Сайт недоступен: ${s.domain}${s.error ? ' — ' + s.error : ''}` });
     else if (s.code >= 400) alerts.push({ level: 'warn', text: `Сайт отвечает ${s.code}: ${s.domain}` });
   }

@@ -419,7 +419,7 @@ function renderOverview(el) {
   const memPct = data.host?.memTotal ? (mem / data.host.memTotal) * 100 : 0;
   const cores = data.host?.ncpu || 1;
   const cpuPct = Math.min((cpu / (cores * 100)) * 100, 100);
-  const up = data.sites.filter((s) => s.code > 0 && s.code < 400).length;
+  const up = data.sites.filter((s) => s.ok).length;
   const bad = data.sites.length - up;
   const avgMs = Math.round(data.sites.reduce((a, s) => a + s.ms, 0) / (data.sites.length || 1));
   const top = [...data.containers].filter((c) => c.stats).sort((a, b) => b.stats.cpu - a.stats.cpu).slice(0, 6);
@@ -526,7 +526,7 @@ function renderSites(el) {
   const filtered = data.sites.filter((s) => !f || s.domain.includes(f));
   const sorted = [...filtered].sort((a, b) => b.ms - a.ms);
   const maxMs = sorted[0]?.ms || 1;
-  const up = data.sites.filter((s) => s.code > 0 && s.code < 400).length;
+  const up = data.sites.filter((s) => s.ok).length;
   const bad = data.sites.length - up;
   const avg = Math.round(data.sites.reduce((a, s) => a + s.ms, 0) / (data.sites.length || 1));
   el.innerHTML =
@@ -537,7 +537,7 @@ function renderSites(el) {
   </div>
   <div class="panelbox"><div class="ph"><h3>Время ответа</h3><div class="legend"><span><i style="background:var(--ok)"></i>до 800 мс</span><span><i style="background:var(--warn)"></i>медленно</span><span><i style="background:var(--red)"></i>ошибка</span></div></div>
   <div class="latlist">${sorted.slice(0, 20).map((s) => {
-    const st = s.code >= 400 || s.code === 0 ? 'bad' : s.ms > 800 ? 'slow' : 'ok';
+    const st = !s.ok ? 'bad' : s.ms > 800 ? 'slow' : 'ok';
     const scale = Math.max(maxMs * 1.1, 500);
     return `<div class="lrow ${st}"><a class="ld" href="https://${esc(s.domain)}" target="_blank" rel="noopener">${esc(s.domain)}</a>
       <div class="lt"><i style="width:${s.code ? Math.max((s.ms / scale) * 100, 2) : 100}%"></i></div>
@@ -547,7 +547,7 @@ function renderSites(el) {
   <div class="sites">` +
     sorted
       .map((s, i) => {
-        const dot = s.code > 0 && s.code < 400 ? 'on' : s.code >= 500 || s.code === 0 ? 'bad' : 'warn';
+        const dot = s.ok ? 'on' : s.code >= 500 || s.code === 0 ? 'bad' : 'warn';
         const upr = uptimeMap[s.domain];
         return `<div class="site" style="animation-delay:${i * 20}ms">
       <div class="d"><span class="dot ${dot}"></span><a href="https://${esc(s.domain)}" target="_blank" style="color:inherit">${esc(s.domain)}</a></div>

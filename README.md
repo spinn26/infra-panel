@@ -56,12 +56,23 @@
 
 ## Install
 
+### Quick install
+
+One command checks Docker, clones this repository to `~/infra-panel`, writes `.env` (asks for a login and password), creates `/opt/fleet/deploy` and `/opt/fleet/backups`, and starts the container:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/spinn26/infra-panel/main/install.sh | bash
+```
+
+Prefer to do it by hand? Follow the steps below.
+
+
 **You need** a Linux server with Docker 24+ and the Compose plugin. A VPS with 1 GB of RAM is enough.
 
 ### 1. Get the code
 
 ```bash
-git clone -b legacy-single-file https://github.com/spinn26/infra-panel.git
+git clone https://github.com/spinn26/infra-panel.git
 ```
 
 ```bash
@@ -146,6 +157,7 @@ Everything is set in `.env`.
 | `HOST_BACKUPS_DIR` | Backup directory on the host | `/opt/fleet/backups` |
 | `HOST_PUBLIC_IP` | Public IP of the server, shown in the SSH hint for the Ubuntu template | — |
 | `DOCKER_GID` | ID of the `docker` group on the host | `985` |
+| `ROOT_404_OK` | Comma-separated domains where a 404 on the root page is expected, such as an API without a home page. They count as online and raise no alert | — |
 
 ## Updating
 
